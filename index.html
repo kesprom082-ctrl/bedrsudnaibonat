@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TV 25 Inch - RSUD Naibonat</title>
+<style>
+body{margin:0;font-family:Arial,sans-serif;background:#eef2f7}
+.header{background:#0056b3;color:#fff;padding:10px 20px;display:flex;justify-content:space-between;align-items:center}
+.logo{font-size:22px;font-weight:bold}
+#clock{font-size:22px;font-weight:bold}
+.main{display:flex;height:82vh}
+.left{width:70%;padding:8px}
+.right{width:30%;padding:8px}
+.panel{background:#fff;height:100%;border-radius:10px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.title{background:#198754;color:#fff;padding:10px;text-align:center;font-size:20px;font-weight:bold}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:8px}
+.card{background:#f8f9fa;border-left:5px solid #198754;border-radius:6px;padding:8px}
+.nama{font-size:15px;font-weight:bold;color:#004085}
+.bed{font-size:24px;font-weight:bold;color:#198754}
+.full .bed{color:red}
+.info{font-size:12px}
+video{width:100%;height:100%;object-fit:cover}
+.footer{background:#198754;color:#fff;padding:10px;font-size:18px;font-weight:bold}
+.pageinfo{text-align:center;font-size:14px;padding:5px}
+</style>
+</head>
+<body>
+<div class="header">
+<div class="logo">🏥 RSUD NAIBONAT</div>
+<div id="clock"></div>
+</div>
+
+<div class="main">
+<div class="left">
+<div class="panel">
+<div class="title">KETERSEDIAAN KAMAR</div>
+<div class="pageinfo" id="pageinfo">Memuat data...</div>
+<div id="grid" class="grid"></div>
+</div>
+</div>
+
+<div class="right">
+<div class="panel">
+<iframe
+    width="100%"
+    height="100%"
+    src="https://screenapp.io/app/v/di8Sg4ev7J"
+    title="Video Promkes"
+    frameborder="0"
+    allow="autoplay; encrypted-media"
+    allowfullscreen>
+	<div class="right">
+<div class="panel">
+<iframe
+    width="100%"
+    height="100%"
+    src="https://screenapp.io/app/v/di8Sg4ev7J"
+    title="Video Promkes"
+    frameborder="0"
+    allow="autoplay; encrypted-media"
+    allowfullscreen>
+</iframe>
+</video>
+</div>
+</div>
+</div>
+
+<div class="footer">
+<marquee id="running">Memuat data...</marquee>
+</div>
+
+<script>
+const API_URL="https://script.google.com/macros/s/AKfycbwNlPudSZsVZ-ufhVwB9P3O4xOuyKQoJlHhX7nWdDxKbzUGAtLmB7r1b1XTe1v3mu0y/exec";
+
+let semuaData=[];
+let halaman=0;
+const perHalaman=18;
+
+function updateClock(){
+ document.getElementById("clock").innerHTML=new Date().toLocaleTimeString("id-ID");
+}
+setInterval(updateClock,1000); updateClock();
+
+function tampilHalaman(){
+ if(!semuaData.length) return;
+
+ const totalHalaman=Math.ceil(semuaData.length/perHalaman);
+ const start=halaman*perHalaman;
+ const end=start+perHalaman;
+
+ const data=semuaData.slice(start,end);
+
+ let html='';
+ data.forEach(item=>{
+  html+=`<div class="card ${Number(item.tersedia)==0?'full':''}">
+   <div class="nama">${item.kamar}</div>
+   <div class="bed">${item.tersedia}</div>
+   <div class="info">${item.info}</div>
+  </div>`;
+ });
+
+ document.getElementById("grid").innerHTML=html;
+ document.getElementById("pageinfo").innerHTML=`Halaman ${halaman+1} dari ${totalHalaman}`;
+
+ halaman=(halaman+1)%totalHalaman;
+}
+
+async function loadData(){
+ try{
+  const res=await fetch(API_URL);
+  const json=await res.json();
+
+  semuaData=json.data||[];
+
+  let running='';
+  semuaData.forEach(item=>{
+   running+=`🏥 ${item.kamar}: ${item.tersedia} bed tersedia | `;
+  });
+  document.getElementById("running").innerHTML=running;
+
+  halaman=0;
+  tampilHalaman();
+
+ }catch(e){
+  document.getElementById("grid").innerHTML="<h2>Gagal memuat data</h2>";
+ }
+}
+
+loadData();
+setInterval(loadData,60000);
+setInterval(tampilHalaman,12000);
+</script>
+</body>
+</html>
